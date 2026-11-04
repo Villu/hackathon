@@ -48,6 +48,13 @@ adjust.
 **Core vs stretch.** Core is everything above "opt". The `schema_retry` guardrail event is
 core: the chaos round needs it for `llm_garbage` mechanism points. Tell teams in the briefing.
 
+**Teams that finish early** get [`starter/EXTRAS.md`](../starter/EXTRAS.md): red-teaming another
+team, poisoned tool output, a model shoot-out, a cost meter, storm grouping, live Azure, a
+dashboard, Kafka, a toolbox skill. Extras earn no separate points. They show up in the demo and
+in rubric 4 (eval harness quality) and 6 (demo). The red-team extra needs two teams. Pair early
+finishers and pass the `.jsonl` files between them. Extra 2 adds a field to the chaos state; the
+scorer still works as long as `POST /chaos` with `{}` clears all faults.
+
 ---
 
 ## 3. Infrastructure

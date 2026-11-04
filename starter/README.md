@@ -78,6 +78,8 @@ tests/                 unit + API tests; xfail tests describe your TODOs
 | opt | `gateway/agent/llm.py` | `azure_openai` provider via the APIM endpoint |
 | opt | `gateway/stream/kafka.py`, `pipeline._store` | Kafka in/out, webhook |
 
+Finished early? See [EXTRAS.md](EXTRAS.md): red-teaming, poisoned tool output, a model shoot-out, a cost meter, storm grouping, live Azure, a dashboard.
+
 ## Useful commands
 
 ```bash
