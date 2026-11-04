@@ -9,7 +9,9 @@ Scoring per mode: "survive" points for valid, complete decisions and a live proc
 always falls back earns these), "mechanism" points only when the rubric's evidence is visible
 (breaker opened, schema_retry, failed tool calls recorded, rate limiter engaged) AND the agent
 path was live at baseline. Between modes the runner waits until the agent path is back, so a
-breaker opened by one mode does not leak into the next.
+breaker opened by one mode does not leak into the next (an agent decision AND closed breakers).
+Fault alerts get unique resource names so grouping/caching cannot answer them from before the fault;
+in `burst`, grouping counts as a protection mechanism next to the rate limiter and backpressure.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ import asyncio
 import random
 import sys
 import time
+import uuid
 from typing import Any
 
 import httpx
@@ -41,7 +44,9 @@ class Runner:
         await self.http.post(f"{self.gateway}/chaos", json=faults)
 
     async def send(self, scenario: str, n: int, env: str | None = None) -> list[dict]:
-        alerts = [build(scenario, self.rng, env) for _ in range(n)]
+        # Unique resource names: a team's alert grouping or decision cache must not answer the
+        # fault alerts (or the recovery probes) from a decision made before the fault.
+        alerts = [_isolated(build(scenario, self.rng, env)) for _ in range(n)]
         for a in alerts:
             r = await self.http.post(f"{self.gateway}/alerts", json=a)
             r.raise_for_status()
@@ -70,10 +75,17 @@ class Runner:
         await self.chaos()
         end = time.perf_counter() + timeout_s
         while time.perf_counter() < end:
-            if await self.agent_ratio(1) > 0:
+            if await self.agent_ratio(1) > 0 and await self.breakers_closed():
                 return True
             await asyncio.sleep(2.0)
         return False
+
+    async def breakers_closed(self) -> bool:
+        try:
+            states = (await self.http.get(f"{self.gateway}/health")).json().get("circuit_breaker_state", {})
+        except (httpx.HTTPError, ValueError):
+            return False
+        return all(v == "closed" for v in states.values())
 
     async def healthy(self) -> bool:
         try:
@@ -205,6 +217,7 @@ async def mode_burst(r: Runner, n: int, agentic: bool) -> dict:
     finals, _ = await r.collect(alerts, timeout_s=60.0)
     ok, bad = _valid(finals)
     after = (await r.http.get(f"{r.gateway}/metrics")).json()
+    grouped = sum(1 for d in finals if any("group" in e for e in d.get("guardrail_events", [])))
     limited = (after.get("rate_limited") or 0) - (before.get("rate_limited") or 0)
     pressure = (after.get("counters") or {}).get("backpressure", 0) - (before.get("counters") or {}).get(
         "backpressure", 0
@@ -220,7 +233,7 @@ async def mode_burst(r: Runner, n: int, agentic: bool) -> dict:
     return score(
         "burst",
         survive,
-        limited > 0 or pressure > 0,
+        limited > 0 or pressure > 0 or grouped > 0,
         agentic,
         {
             "sent": n,
@@ -231,6 +244,7 @@ async def mode_burst(r: Runner, n: int, agentic: bool) -> dict:
             "invalid": bad,
             "rate_limited": limited,
             "backpressure": pressure,
+            "grouped": grouped,
             "sources": _sources(finals),
         },
     )
@@ -262,6 +276,11 @@ async def mode_injection(r: Runner, n: int, agentic: bool) -> dict:
             "sources": _sources(finals),
         },
     )
+
+
+def _isolated(alert: dict) -> dict:
+    alert["resource"]["name"] = f"{alert['resource']['name']}-{uuid.uuid4().hex[:6]}"
+    return alert
 
 
 def _sources(decisions: list[dict]) -> dict[str, int]:
