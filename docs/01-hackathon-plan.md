@@ -39,7 +39,7 @@ responsible AI-assisted development.
 | 10:45–12:30 | **Build Sprint 1 — Tool-calling agent** | Teams | Alert ingestion (REST, optionally Kafka) → agent loop → MCP tools (`query_logs`, `get_deployment_history`, `get_resource_state`) → validated `TriageDecision`. Goal: one alert triaged end-to-end with real tool calls |
 | 12:30–13:15 | Lunch + checkpoint | Teams | Before lunch each team shows one alert flowing through. Facilitator notes blockers |
 | 13:15–15:30 | **Build Sprint 2 — Reliability layer + eval harness** | Teams | Schema/regex guardrails, action allowlist, token bucket, circuit breaker, deadline-based fallback to deterministic escalation, confidence threshold. Live scoring on `/metrics` and golden-set runner |
-| 15:30–16:00 | **Chaos round** | Facilitator | Organizer runs `evals/chaos.py` against every team: LLM latency spikes, garbage output, alert burst, MCP server down. Scores recorded live |
+| 15:30–16:00 | **Chaos round** | Facilitator | Teams tag `freeze`; organiser runs `scoring/score_team.sh` (private repo) on sepman.net for every team and shows one team's chaos run live: LLM latency spikes, garbage output, alert burst, MCP server down. Scores recorded live |
 | 16:00–16:45 | Demos | Teams | 5 min per team: architecture in one picture, one live alert, one failure mode survived, what OpenCode did well and badly |
 | 16:45–17:15 | Judging & retro | Judges + all | Rubric tally. Retro on the AI-assisted workflow: small changes? understood generated code? removed AI noise? two people before merge? |
 | 17:15–17:30 | Awards & wrap-up | Facilitator | Winners, what goes back to Webstep, repo handover |
@@ -55,7 +55,7 @@ Demos are timed. Judges deliberate during the retro.
 |------|--------|------------------|
 | Facilitator / Head Judge | 1 | Runs the day, presents, owns rubric and final scores |
 | Setup helpers | 2 | Roam during 09:15–10:00, unblock installs (Windows/macOS/Linux) |
-| Infra owner | 1 | Owns Azure subscription `GPT Initium`, resource group `VilluResourceGroup`, Gemini keys, budget alerts (NOK 25/50/100/250 already configured), kills runaway spend |
+| Infra owner | 1 | Owns Azure subscription `GPT Initium`, resource group `VilluResourceGroup`, Gemini keys, budget alerts (NOK 700/month, alerts at 70/175/350/525 already configured), kills runaway spend |
 | Judges | 2–3 | Score demos and chaos round; at least one from outside the teams |
 | Teams | 3–4 per team, 4–6 teams | Build |
 
@@ -63,14 +63,16 @@ Demos are timed. Judges deliberate during the retro.
 
 ## 4. Pre-event checklist (T-7 days → T-0)
 
+The detailed timeline with commands is in `06-instructor-guide.md` §4; this is the summary.
+
 - [ ] Starter repo (`starter/`) tagged and pushed to the internal Git; `pytest` green in mock mode on Windows, macOS and Linux.
 - [ ] Gemini API keys: one key per team, distributed via password manager, quota checked. Never in the repo.
 - [ ] Azure: participants can `az login` to the tenant and have Reader, Log Analytics Reader and Monitoring Reader on `VilluResourceGroup`. Run `starter/scripts/azure_bootstrap.sh` to create the Log Analytics workspace and a noisy sample Container App that produces logs and revisions.
-- [ ] Budget alerts on the resource group verified (live: NOK 500/month, alerts at 25/50/100/250).
+- [ ] Budget alerts on the resource group verified (live: NOK 700/month, alerts at 10/25/50/75 % = NOK 70/175/350/525).
 - [ ] OpenCode 1.4+ and oh-my-openagent tested on a fresh Windows laptop (WSL recommended) and a fresh Mac. Exact versions noted in the setup guide.
 - [ ] Optional: Docker Desktop for teams who want Kafka (Redpanda compose file in starter).
 - [ ] Slides (`slides/hackathon-slides.pptx`) reviewed. AI-usage briefing reviewed; client example kept to team rules only, no client-internal document references.
-- [ ] Eval harness (`starter/evals/`) run against a reference solution; chaos scenarios produce differentiated scores.
+- [x] Eval harness run against the reference solution; chaos scores differentiate (reference 25/25, untouched starter 12/25).
 - [ ] Rubric printed for judges (`05-judging-rubric.md`).
 - [ ] Room: big screen, power, Wi-Fi with outbound HTTPS to `generativelanguage.googleapis.com`, `*.azure.com`, `registry.npmjs.org`, `pypi.org`, `opencode.ai`.
 

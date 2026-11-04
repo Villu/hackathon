@@ -11,6 +11,7 @@ reliability layer, using OpenCode + oh-my-openagent.
 | Setup guide: OpenCode, oh-my-openagent, Gemini, Azure CLI, starter | [docs/03-setup-guide.md](docs/03-setup-guide.md) |
 | Software specification (contracts, deliverables, chaos modes, config, API) | [docs/04-software-spec.md](docs/04-software-spec.md) |
 | Judging rubric (100 points, printable) | [docs/05-judging-rubric.md](docs/05-judging-rubric.md) |
+| **Instructor guide**: infrastructure, pre-event timeline, run sheet, scoring procedure, helper cheat sheet | [docs/06-instructor-guide.md](docs/06-instructor-guide.md) |
 | Slide deck for the day | [slides/hackathon-slides.pptx](slides/hackathon-slides.pptx) |
 | Starter repository for participants (Python, tested) | [starter/](starter/README.md) |
 
@@ -20,16 +21,19 @@ checked out locally as `private/` (git-ignored here).
 
 ## Before the event
 
-1. Push `starter/` to the internal Git as its own repository (`git init` inside it; `.gitignore` is in place).
-2. Run `starter/scripts/azure_bootstrap.sh` once with `az login` to create the Log Analytics
-   workspace and the sample Container App; post the workspace id to participants.
-3. Distribute one Gemini key per team via the password manager.
-4. Walk through `docs/03-setup-guide.md` on a clean laptop and note the versions.
+See the timeline in [docs/06-instructor-guide.md](docs/06-instructor-guide.md) §4. In short: push
+`starter/` for teams, one Gemini key per team, `starter/scripts/azure_bootstrap.sh resume` +
+`grant`, pre-event install mail, one timed OpenCode dry run.
 
-## Verified in this package
+## Verified in this package (2026-11-04)
 
-- Starter: `pytest -q` → 47 passed, 5 xfailed (the xfails are the participants' TODOs), `ruff` clean.
-- Running gateway with the MCP subprocess, the alert simulator (all three payload shapes), the
-  golden-set runner and the chaos runner were exercised locally in mock mode.
-- Not exercised: live Gemini calls (no key on the build machine) and the Azure backend
-  (no `az` on the build machine). Both are isolated behind `LLM_PROVIDER` / `MOCK_AZURE` flags.
+- Starter: `pytest -q` → 47 passed, 5 xfailed (the participants' TODOs), `ruff` clean, on
+  Windows (Python 3.14) and Linux (3.12). macOS not tested.
+- Reference solution (private repo) with every TODO done: live Gemini + mock Azure 46/47 on all
+  18 golden cases (p50 enrichment 2.4 s); live Gemini + live Azure 47/47; chaos 25/25 + injection
+  6/6 in mock mode. Untouched starter: 32–33/47, chaos 12/25, injection 3/6.
+- Azure: `azure_bootstrap.sh up` run against `GPT Initium`; all five MCP tools verified live
+  (revisions, logs, resource state); apps currently paused.
+- Organiser scoring script (`hackathon-private/scoring/score_team.sh`) run end to end on sepman.net.
+- Not verified: OpenCode + oh-my-openagent timing for the TODOs, a clean macOS setup,
+  participant role grants (no participant list yet).

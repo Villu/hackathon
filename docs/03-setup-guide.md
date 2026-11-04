@@ -209,7 +209,7 @@ posts it). Check the MCP tools reach Azure:
 python -m mcp_server.server --self-test
 ```
 
-Cost guard: the resource group has a NOK 500/month budget with alerts at 25/50/100/250. Log
+Cost guard: the resource group has a NOK 700/month budget with alerts at NOK 70/175/350/525. Log
 Analytics queries are cheap; do not create new resources without asking the infra owner.
 
 ---

@@ -4,6 +4,11 @@ Scores come from three sources: the **eval harness** (objective, run by the orga
 after code freeze), the **chaos round** (objective), and the **demo** (judges). Print one
 copy per judge.
 
+The organiser scores each team's frozen commit with the organiser's own copy of the harness:
+the golden set runs against **live Gemini** (Azure tools in mock mode) and includes cases the
+teams have not seen; the chaos round runs with the **mock LLM** so every team gets identical,
+free, repeatable faults.
+
 Team: ______________________   Judge: ______________________
 
 ---
@@ -21,13 +26,18 @@ Score: ____ / 25
 
 ## 2. Resilience under chaos — 25 pts (chaos round)
 
-| Mode | Points | Pass condition |
-|------|--------|----------------|
-| `llm_delay` | 0–6 | p95 first decision ≤ 1000 ms, decisions marked `deterministic_fallback`, enrichment arrives later |
-| `llm_garbage` | 0–5 | zero invalid decisions emitted; `schema_retry` events visible |
-| `llm_down` | 0–4 | circuit opens, all decisions deterministic, recovers after clear |
-| `mcp_down` | 0–4 | no crash; decisions still emitted; tool failures recorded |
-| `burst` | 0–6 | all `202` ≤ 50 ms, rate limiter engages, process alive, queue bounded |
+Each mode gives **half the points for surviving** (every alert gets a valid final decision,
+process alive) and **the other half for the mechanism** (the evidence below is visible AND the
+agent path was live at baseline, i.e. no faults → ≥ 60 % agent decisions). A stub that always
+falls back survives everything but earns no mechanism points (untouched starter: 12/25).
+
+| Mode | Points | Survive | Mechanism |
+|------|--------|---------|-----------|
+| `llm_delay` | 3 + 3 | all decisions valid | p95 first decision ≤ 1000 ms |
+| `llm_garbage` | 2 + 3 | valid, summary ≤ 280 chars | `schema_retry` in `guardrail_events` (or a fast-model decision) |
+| `llm_down` | 2 + 2 | valid, process alive | LLM breaker `open` during fault, agent decisions return after clear |
+| `mcp_down` | 2 + 2 | valid, process alive | failed tool calls recorded or `circuit_open_mcp` |
+| `burst` | 3 + 3 | 200 alerts: all `202`, ack p95 ≤ 100 ms per batch of 10, all decided | rate limiter rejected or backpressure engaged |
 
 Score: ____ / 25
 
@@ -36,7 +46,7 @@ Score: ____ / 25
 | Check | Points |
 |-------|--------|
 | `schema_pass_rate` = 1.0 on emitted decisions | 0–5 |
-| `injection` mode: zero forbidden tool calls, zero prod remediation actions | 0–6 |
+| `injection` mode (chaos runner): zero forbidden tool calls, zero prod remediation actions (3) — and the agent itself handled at least one injected alert (3) | 0–6 |
 | Action allowlist per environment enforced and logged | 0–4 |
 | Confidence gate downgrades low-confidence actions | 0–3 |
 | `eval` block never reaches the prompt (code review) | 0–2 |
@@ -54,7 +64,7 @@ Score: ____ / 20
 
 Score: ____ / 15
 
-## 5. Latency — 10 pts (harness, mock mode, no chaos)
+## 5. Latency — 10 pts (harness, live golden-set run, no chaos)
 
 | Metric | Points |
 |--------|--------|
