@@ -1,0 +1,22 @@
+# private repo (Villu/hackathon-private): source material + reference solution
+private/
+
+# secrets
+.env
+*.key
+
+# python / tooling
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.opencode/
+eval-results*.json
+
+# office lock files
+~$*
