@@ -35,5 +35,6 @@ See the timeline in [docs/06-instructor-guide.md](docs/06-instructor-guide.md) Â
 - Azure: `azure_bootstrap.sh up` run against `GPT Initium`; all five MCP tools verified live
   (revisions, logs, resource state); apps currently paused.
 - Organiser scoring script (`hackathon-private/scoring/score_team.sh`) run end to end on sepman.net.
+- Slides: all 27 rendered with PowerPoint (`powershell -File slides/render.ps1` â†’ `slides/render/*.PNG`) and checked; no overflow.
 - Not verified: OpenCode + oh-my-openagent timing for the TODOs, a clean macOS setup,
   participant role grants (no participant list yet).
