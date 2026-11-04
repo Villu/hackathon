@@ -21,6 +21,7 @@ def _wait_final(client, alert_id: str, timeout_s: float = 5.0) -> dict:
 
 
 def test_alert_is_accepted_and_falls_back_to_deterministic(client):
+    client.post("/chaos", json={"llm_down": True})  # force the fallback path, agent or not
     alert = cpu_spike()
     r = client.post("/alerts", json=alert)
     assert r.status_code == 202
