@@ -4,6 +4,10 @@ Pick any, in any order, once your core TODOs are green. Each one gives you somet
 the demo. Ground rules still apply: approved endpoints only, synthetic data only, keep
 `POST /chaos` working, small commits, and you must be able to explain the code.
 
+Extras earn no separate points, but the organiser's scorer checks for them and shows the result to the
+judges. Keep the names used below (`redteam_*.jsonl`, the `tool_poison` fault, a `group…` event,
+a token counter on `/metrics`, `/dashboard`, `skills/`) so it can find your work.
+
 | # | Extra | Flavour | Time |
 |---|-------|---------|------|
 | 1 | Red-team another team | security, social | 30–60 min |
