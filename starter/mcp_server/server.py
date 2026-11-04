@@ -26,6 +26,7 @@ from mcp_server.config import get_mcp_settings
 
 logging.basicConfig(level=logging.INFO, stream=sys.stderr, format="%(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("mcp_server")
+logging.getLogger("azure").setLevel(logging.WARNING)  # the SDK logs every HTTP response at INFO
 
 mcp = MCPServer("azure-triage-tools")
 _backend: Backend | None = None
