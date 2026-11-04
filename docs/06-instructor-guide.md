@@ -217,6 +217,9 @@ summary line lists them as `extras: 1,2,5,...`. `extras.txt` has one line per ex
 | 9 | files under `skills/` |
 | 3, 6 | judge: the shoot-out table in the demo. For 6, the team's own Azure code runs its self-test with the organiser's `az login` (set `SKIP_AZURE=1` to skip) |
 
+**Live runs vary.** The same reference code scored 47 and 45 of 47 on two runs (live Gemini is not
+deterministic). If two teams are within ~3 points, re-run both before deciding.
+
 Watch the interaction between extra 5 and the chaos round: a team that groups alerts makes fewer
 LLM calls, so during `llm_down` its breaker may open later. Check `chaos.txt` before
 blaming the extra. The repo must be readable by the
