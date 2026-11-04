@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     llm_provider: Literal["gemini", "azure_openai", "mock"] = "gemini"
     gemini_api_key: str | None = None
     gemini_primary_model: str = "gemini-2.5-flash"
-    gemini_fast_model: str = "gemini-2.5-flash-lite"
+    gemini_fast_model: str = "gemini-3.1-flash-lite"
+    gemini_thinking_budget: int = 0  # 0 = no thinking (fast); -1 = model default
     azure_openai_endpoint: str | None = None
     azure_openai_deployment: str | None = None
     azure_openai_api_key: str | None = None
@@ -37,8 +38,8 @@ class Settings(BaseSettings):
     decision_webhook_url: str | None = None
 
     # --- Reliability -----------------------------------------------------
-    llm_primary_budget_ms: int = 700
-    llm_fast_budget_ms: int = 250
+    llm_primary_budget_ms: int = 3000
+    llm_fast_budget_ms: int = 2000
     enrich_deadline_ms: int = 15_000
     confidence_threshold: float = 0.7
     llm_rps: float = 5.0

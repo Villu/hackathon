@@ -173,7 +173,7 @@ All of these are deterministic code paths, testable without an LLM.
 | **Regex / content guardrails** | Reject or sanitise: shell commands, credential-like strings (`AKIA…`, `sk-…`, JWTs), markdown/URLs beyond runbook, injection phrases. Applied to `root_cause_summary` and `evidence[].summary`. **MUST** |
 | **Action allowlist** | Per environment: `prod → {no_action, acknowledge, escalate_to_oncall}`, `staging → + {restart_revision, rollback_deployment, scale_out}`, `dev → all`. Violations downgraded, never executed. **MUST** |
 | **Confidence gate** | `confidence < CONFIDENCE_THRESHOLD` (default 0.7) → decision kept as evidence but action becomes `escalate_to_oncall`, `decision_source` unchanged, event logged. **MUST** |
-| **Deadline + fallback ladder** | Primary model budget `LLM_PRIMARY_BUDGET_MS` (default 700) → fast model `LLM_FAST_BUDGET_MS` (default 250) → deterministic. First decision **MUST** be emitted ≤ 1000 ms p95 under the chaos round. Enrichment **MAY** continue to `ENRICH_DEADLINE_MS` (default 15000). **MUST** |
+| **Deadline + fallback ladder** | Primary model budget `LLM_PRIMARY_BUDGET_MS` (default 3000, per call) → fast model `LLM_FAST_BUDGET_MS` (default 2000) → deterministic. First decision **MUST** be emitted ≤ 1000 ms p95 under the chaos round. Enrichment **MAY** continue to `ENRICH_DEADLINE_MS` (default 15000). **MUST** |
 | **Token bucket rate limiter** | Per team key: `LLM_RPS` (default 5) with burst `LLM_BURST` (default 10). When empty, the alert goes deterministic, it does not queue behind the LLM. **MUST** |
 | **Circuit breaker** | Around LLM and MCP: open after `CB_FAILURES` (default 5) failures in 30 s, half-open probe every 10 s. Open breaker → deterministic. **MUST** |
 | **Injection resistance** | `annotations` text wrapped as data in the prompt, `eval` stripped, tools cannot be invoked by alert text. **MUST** |
@@ -249,7 +249,8 @@ the LLM client and MCP client; disabling it forfeits the resilience points).
 |----------|---------|-------|
 | `GEMINI_API_KEY` | — | team key |
 | `GEMINI_PRIMARY_MODEL` | `gemini-2.5-flash` | bump to the newest Flash you have |
-| `GEMINI_FAST_MODEL` | `gemini-2.5-flash-lite` | fallback tier |
+| `GEMINI_FAST_MODEL` | `gemini-3.1-flash-lite` | fallback tier |
+| `GEMINI_THINKING_BUDGET` | `0` | 0 = thinking off (about 0.8 s instead of 6 s per call); -1 = model default |
 | `LLM_PROVIDER` | `gemini` | `gemini | azure_openai | mock` |
 | `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_KEY` | — | optional, via the APIM endpoints in `VilluResourceGroup` |
 | `MOCK_AZURE` | `true` | `false` uses `az login` credentials |
@@ -258,7 +259,7 @@ the LLM client and MCP client; disabling it forfeits the resilience points).
 | `LOG_ANALYTICS_WORKSPACE_ID` | — | posted by facilitator |
 | `STREAM_SOURCE` | `rest` | `rest | kafka` |
 | `KAFKA_BOOTSTRAP` | `localhost:19092` | Redpanda |
-| `LLM_PRIMARY_BUDGET_MS` / `LLM_FAST_BUDGET_MS` / `ENRICH_DEADLINE_MS` | `700` / `250` / `15000` | |
+| `LLM_PRIMARY_BUDGET_MS` / `LLM_FAST_BUDGET_MS` / `ENRICH_DEADLINE_MS` | `3000` / `2000` / `15000` | |
 | `CONFIDENCE_THRESHOLD` | `0.7` | |
 | `LLM_RPS` / `LLM_BURST` | `5` / `10` | token bucket |
 | `CB_FAILURES` | `5` | circuit breaker |

@@ -101,6 +101,9 @@ class LLMClient:
             automatic_function_calling=gtypes.AutomaticFunctionCallingConfig(disable=True) if tools else None,
             response_mime_type="application/json" if response_schema else None,
             response_schema=response_schema,
+            thinking_config=gtypes.ThinkingConfig(thinking_budget=self.settings.gemini_thinking_budget)
+            if self.settings.gemini_thinking_budget >= 0
+            else None,
         )
         try:
             resp = await asyncio.wait_for(
